@@ -17,7 +17,7 @@ class GameEngine:
         self.grid_height = height // self.cell_size
 
         self.snake = Snake(self.grid_width // 2, self.grid_height // 2, self.cell_size)
-        self.food = Food(self.grid_width, self.grid_height, self.cell_size)
+        self.food = Food(self.grid_width, self.grid_height, self.cell_size, self.snake.body)
 
         self.score = 0
         self.font = pygame.font.SysFont("Arial", 30)
