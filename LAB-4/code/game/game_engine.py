@@ -1,6 +1,7 @@
 import pygame
 from .snake import Snake
 from .food import Food
+from .sound import Sounds
 
 # Game Engine
 
@@ -26,6 +27,7 @@ class GameEngine:
         self.font = pygame.font.SysFont("Arial", 30)
         self.big_font = pygame.font.SysFont("Arial", 60, bold=True)
         self.quit_requested = False
+        self.sounds = Sounds()
 
         self.reset(8)
 
@@ -83,11 +85,13 @@ class GameEngine:
             # it hit, not past the edge of the screen or on top of itself.
             self.snake.body = prev_body
             self.game_over = True
+            self.sounds.play(self.sounds.game_over)
             return
 
         if self.snake.head_rect().colliderect(self.food.rect()):
             self.snake.grow()
             self.score += 1
+            self.sounds.play(self.sounds.eat)
             self.food.respawn(self.snake.body)
 
     def render(self, screen):
