@@ -7,13 +7,22 @@ class Snake:
         self.body = [(x, y), (x - 1, y), (x - 2, y)]
         self.direction = (1, 0)  # moving right
         self.grow_pending = False
+        # Buffered turns, applied one per move so two quick key presses
+        # within a single tick can't add up to a reversal.
+        self.direction_queue = []
 
     def set_direction(self, dx, dy):
-        # NOTE: does not currently guard against reversing directly
-        # into the segment behind the head.
-        self.direction = (dx, dy)
+        # Validate against the last queued direction (or the current one),
+        # ignoring reversals and repeats of the same direction.
+        last = self.direction_queue[-1] if self.direction_queue else self.direction
+        if (dx, dy) == last or (dx, dy) == (-last[0], -last[1]):
+            return
+        if len(self.direction_queue) < 2:
+            self.direction_queue.append((dx, dy))
 
     def move(self):
+        if self.direction_queue:
+            self.direction = self.direction_queue.pop(0)
         head_x, head_y = self.body[0]
         dx, dy = self.direction
         new_head = (head_x + dx, head_y + dy)
