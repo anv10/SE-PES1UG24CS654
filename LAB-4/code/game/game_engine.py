@@ -29,7 +29,7 @@ class GameEngine:
         self._game_over_logged = False
 
     def handle_keydown(self, key):
-        # Direction changes are applied immediately on key press.
+        # Direction changes are buffered by the snake and applied on its next move.
         if key in (pygame.K_UP, pygame.K_w):
             self.snake.set_direction(0, -1)
         elif key in (pygame.K_DOWN, pygame.K_s):
@@ -54,13 +54,14 @@ class GameEngine:
             return
         self._frame_counter = 0
 
+        prev_body = list(self.snake.body)
         self.snake.move()
 
-        if self.snake.collides_with_wall(self.grid_width, self.grid_height):
-            self.game_over = True
-            return
-
-        if self.snake.collides_with_self():
+        if (self.snake.collides_with_wall(self.grid_width, self.grid_height)
+                or self.snake.collides_with_self()):
+            # Undo the fatal move so the head is drawn against the wall/body
+            # it hit, not past the edge of the screen or on top of itself.
+            self.snake.body = prev_body
             self.game_over = True
             return
 
