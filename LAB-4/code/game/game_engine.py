@@ -8,6 +8,13 @@ WHITE = (255, 255, 255)
 GREEN = (0, 200, 0)
 RED = (220, 60, 60)
 
+# Replay difficulty: key -> (label, moves per second)
+DIFFICULTIES = {
+    pygame.K_1: ("Easy", 6), pygame.K_KP1: ("Easy", 6),
+    pygame.K_2: ("Medium", 10), pygame.K_KP2: ("Medium", 10),
+    pygame.K_3: ("Hard", 15), pygame.K_KP3: ("Hard", 15),
+}
+
 class GameEngine:
     def __init__(self, width, height):
         self.width = width
@@ -16,24 +23,30 @@ class GameEngine:
         self.grid_width = width // self.cell_size
         self.grid_height = height // self.cell_size
 
+        self.font = pygame.font.SysFont("Arial", 30)
+        self.big_font = pygame.font.SysFont("Arial", 60, bold=True)
+        self.quit_requested = False
+
+        self.reset(8)
+
+    def reset(self, moves_per_second):
+        # Start a fresh round at the given speed.
         self.snake = Snake(self.grid_width // 2, self.grid_height // 2, self.cell_size)
         self.food = Food(self.grid_width, self.grid_height, self.cell_size, self.snake.body)
 
         self.score = 0
-        self.font = pygame.font.SysFont("Arial", 30)
-        self.big_font = pygame.font.SysFont("Arial", 60, bold=True)
-
-        self.moves_per_second = 8
+        self.moves_per_second = moves_per_second
         self._frame_counter = 0
 
         self.game_over = False
-        self.quit_requested = False
 
     def handle_keydown(self, key):
         if self.game_over:
             # Game Over screen waits for the player's choice.
             if key in (pygame.K_q, pygame.K_ESCAPE):
                 self.quit_requested = True
+            elif key in DIFFICULTIES:
+                self.reset(DIFFICULTIES[key][1])
             return
 
         # Direction changes are buffered by the snake and applied on its next move.
@@ -101,9 +114,11 @@ class GameEngine:
         lines = [
             (self.big_font, "GAME OVER", RED),
             (self.font, f"Final Score: {self.score}", WHITE),
+            (self.font, "Play again - choose a speed:", WHITE),
+            (self.font, "1 = Easy    2 = Medium    3 = Hard", WHITE),
             (self.font, "Press Q or Esc to quit", WHITE),
         ]
-        y = self.height // 2 - 80
+        y = self.height // 2 - 140
         for font, text, color in lines:
             surface = font.render(text, True, color)
             screen.blit(surface, surface.get_rect(center=(self.width // 2, y)))
