@@ -2,13 +2,13 @@ import pygame
 import random
 
 class Food:
-    def __init__(self, grid_width, grid_height, cell_size):
+    def __init__(self, grid_width, grid_height, cell_size, occupied_cells=()):
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.cell_size = cell_size
         self.x = 0
         self.y = 0
-        self.respawn([])
+        self.respawn(occupied_cells)
 
     def respawn(self, occupied_cells):
         while True:
